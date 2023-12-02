@@ -3,11 +3,12 @@ import scala.io.Source
 @main def main() =
   val input =
     for line <- Source.fromResource("input.txt").getLines()
-      yield findDigits(line)
+    yield findDigits(line)
   println(calibrate(input.toSeq))
 
 def calibrate(input: Seq[String]): Int =
-  val numbers = for str <- input
+  val numbers =
+    for str <- input
     yield str.toIntOption match
       case Some(value) => value
       case None => 0
