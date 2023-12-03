@@ -21,19 +21,16 @@ class MySuite extends munit.FunSuite {
     assert(!Ball(1, "red").contains(Ball(2, "red")))
     assert(!Ball(1, "red").contains(Ball(1, "blue")))
   }
-  test("hand contains") {
-    val hand1 = Hand(Seq(Ball(1, "red"), Ball(1, "blue")))
-    val hand2 = Hand(Seq(Ball(2, "red"), Ball(2, "blue")))
-    val hand3 = Hand(Seq(Ball(2, "red"), Ball(2, "green")))
-    assert(hand1.contains(hand1))
-    assert(!hand1.contains(hand2))
-    assert(!hand1.contains(hand3))
-    assert(hand2.contains(hand1))
-    assert(hand2.contains(hand2))
-    assert(!hand2.contains(hand3))
-    assert(!hand3.contains(hand1))
-    assert(!hand3.contains(hand2))
-    assert(hand3.contains(hand3))
+  test("hands max") {
+    val inputs = Seq(
+      (1, "1 red"),
+      (3, "1 red; 2 red; 3 red"),
+      (3, "3 red; 2 red; 1 red"),
+      (24, "4 red; 3 green; 2 blue"),
+    )
+    for (power, input) <- inputs do
+      val hands = Hand.parseSeq(input)
+      assertEquals(Hand.highest(hands).power, power)
   }
   test("sum games") {
     val inputs = Seq(
@@ -44,7 +41,7 @@ class MySuite extends munit.FunSuite {
       "Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green",
     )
     val games = for input <- inputs yield Game.parse(input)
-    val sum = Game.sum(games, availableHand)
-    assertEquals(sum, 8)
+    val sum = Game.sum(games)
+    assertEquals(sum, 2286)
   }
 }
