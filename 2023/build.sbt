@@ -1,4 +1,5 @@
 ThisBuild / scalaVersion := "3.3.1"
+ThisBuild / scalacOptions ++= Seq("-unchecked", "-deprecation")
 
 lazy val baseSettings = Seq(
   libraryDependencies += "org.scalameta" %% "munit" % "0.7.29" % Test,
@@ -9,3 +10,6 @@ lazy val baseSettings = Seq(
 
 lazy val day01 = (project in file("day01"))
   .settings(name := "day01", baseSettings)
+
+lazy val day02 = (project in file("day02"))
+  .settings(name := "day02", baseSettings)
