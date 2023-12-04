@@ -1,5 +1,3 @@
-import scala.collection.mutable.HashMap
-
 class MySuite extends munit.FunSuite {
   test("adjacent") {
     val p = Position(1, 1)
@@ -36,6 +34,6 @@ class MySuite extends munit.FunSuite {
     )
     val grid = Grid.empty
     for row <- rows do grid.parseRow(row)
-    assertEquals(grid.sum, 4361)
+    assertEquals(grid.sum, 467835)
   }
 }

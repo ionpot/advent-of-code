@@ -8,24 +8,26 @@ import scala.collection.mutable.Set
     grid.parseRow(line)
   println(grid.sum)
 
-val digit = "[0-9]+".r
-val symbol = "[^.0-9]".r
+val digits = "[0-9]+".r
+val gear = "[*]".r
 
-case class Grid(numbers: ArrayBuffer[Number], symbols: Set[Position]):
+case class Grid(numbers: ArrayBuffer[Number], gears: Set[Position]):
   private var row = 0
 
   def parseRow(input: String): Unit =
     row += 1
-    for found <- digit.findAllMatchIn(input) do
+    for found <- digits.findAllMatchIn(input) do
       val pos = Position(row, found.start)
       numbers.append(Number(pos, found.matched))
-    for found <- symbol.findAllMatchIn(input) do
-      symbols.add(Position(row, found.start))
+    for found <- gear.findAllMatchIn(input) do
+      gears.add(Position(row, found.start))
 
   def sum: Int =
     numbers
-      .filter(num => num.isNear(symbols))
-      .map(num => num.text.toInt)
+      .groupBy(number => number.nearTo(gears))
+      .filter((key, nums) => key != None && nums.length == 2)
+      .values
+      .map(nums => nums.map(n => n.text.toInt).multiply)
       .sum
 
 case object Grid:
@@ -33,8 +35,8 @@ case object Grid:
 
 case class Number(pos: Position, text: String):
   def adjacent = pos.adjacent(text.length())
-  def isNear(symbols: Set[Position]): Boolean =
-    adjacent.exists(symbols.contains)
+  def nearTo(gears: Set[Position]): Option[Position] =
+    adjacent.find(gears.contains)
 
 case class Position(row: Int, col: Int):
   def adjacent(size: Int): Seq[Position] =
@@ -42,3 +44,9 @@ case class Position(row: Int, col: Int):
       i <- row - 1 to row + 1
       j <- col - 1 to col + size
     yield Position(i, j)
+
+extension (arr: ArrayBuffer[Int])
+  def multiply: Int =
+    arr match
+      case ArrayBuffer() => 0
+      case s => s.fold(1)(_ * _)
