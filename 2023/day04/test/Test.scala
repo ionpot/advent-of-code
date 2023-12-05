@@ -8,9 +8,9 @@ class MySuite extends munit.FunSuite {
       "Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36",
       "Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11",
     )
-    val points =
-      for input <- lines
-      yield Card.parse(input).points
-    assertEquals(points.sum, 13)
+    val cards = Cards.empty
+    for line <- lines
+    do cards.add(line)
+    assertEquals(cards.sum, 30)
   }
 }

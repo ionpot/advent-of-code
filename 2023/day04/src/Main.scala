@@ -1,16 +1,33 @@
 import scala.io.Source
+import scala.collection.mutable.ArrayBuffer
 
 @main def main() =
-  val points =
-    for line <- Source.fromResource("input.txt").getLines()
-    yield Card.parse(line).points
-  println(points.sum)
+  val cards = Cards.empty
+  for line <- Source.fromResource("input.txt").getLines()
+  do cards.add(line)
+  println(cards.sum)
+
+case class Cards(totals: ArrayBuffer[Int]):
+  private var current = 0
+  def sum: Int = totals.sum
+  def add(input: String): Unit = add(Card.parse(input))
+  def add(card: Card): Unit =
+    addTo(current, 1)
+    distribute(next = card.matches, copies = totals(current))
+    current += 1
+  def distribute(next: Int, copies: Int): Unit =
+    if next > 0 then
+      for i <- current + 1 to current + next
+      do addTo(i, copies)
+  def addTo(i: Int, copies: Int): Unit =
+    if totals.length == i then totals.addOne(0)
+    totals(i) += copies
+
+case object Cards:
+  def empty = Cards(ArrayBuffer())
 
 case class Card(winning: Set[String], numbers: Set[String]):
-  def points: Int =
-    numbers.count(winning.contains) match
-      case 0 => 0
-      case n => scala.math.pow(2, n - 1).toInt
+  def matches: Int = numbers.count(winning.contains)
 
 case object Card:
   def parse(input: String): Card =
