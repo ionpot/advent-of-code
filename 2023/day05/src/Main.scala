@@ -2,15 +2,27 @@ import scala.io.Source
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.Set
 import scala.util.boundary
+import scala.concurrent.Future
+import concurrent.ExecutionContext.Implicits.global
 
 @main def main() =
   val lines = Source.fromResource("input.txt").getLines()
   val alm = Almanac.empty
   alm.parse(lines)
-  println(alm.lowest)
+  for lowest <- alm.lowest
+  do println(lowest)
 
-case class Almanac(seeds: Set[Long], maps: ArrayBuffer[Mapping]):
-  def lowest: Long = seeds.map(locationOf).min
+case class Almanac(seedSet: Set[Seeds], maps: ArrayBuffer[Mapping]):
+  def lowest: Future[Long] =
+    val tasks = seedSet.map(seeds => Future(lowestOf(seeds)))
+    for locations <- Future.sequence(tasks)
+    yield locations.min
+  def lowestOf(seeds: Seeds): Long =
+    var min = 0L
+    for seed <- seeds.first to seeds.last do
+      val loc = locationOf(seed)
+      if min == 0L || min > loc then min = loc
+    min
   def locationOf(seed: Long): Long =
     var value = seed
     for mapping <- maps do value = mapping.map(value)
@@ -21,12 +33,8 @@ case class Almanac(seeds: Set[Long], maps: ArrayBuffer[Mapping]):
     else if line.endsWith("map:") then addMapping(lines)
     if lines.hasNext then parse(lines)
   def addSeeds(input: String): Unit =
-    input
-      .split(": ")
-      .last
-      .split(" ")
-      .map(s => s.toLong)
-      .foreach(seeds.add)
+    for seeds <- Seeds.parse(input)
+    do seedSet.addOne(seeds)
   def addMapping(lines: Iterator[String]): Unit =
     val ranges = MapRange.parse(lines)
     maps.addOne(Mapping(ranges))
@@ -61,3 +69,18 @@ case object MapRange:
         if lines.hasNext then parse(lines, appended)
         else appended
       case _ => ranges
+
+case class Seeds(first: Long, count: Long):
+  def last: Long = first + count - 1
+
+case object Seeds:
+  def parse(input: String): Seq[Seeds] =
+    val numbers = input
+      .split(": ")
+      .last
+      .split(" ")
+      .map(s => s.toLong)
+    for
+      i <- 0 until numbers.length - 1
+      if i % 2 == 0
+    yield Seeds(first = numbers(i), count = numbers(i + 1))
