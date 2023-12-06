@@ -6,16 +6,15 @@ lazy val baseSettings = Seq(
   Compile / scalaSource := sourceDirectory.value,
   Compile / resourceDirectory := baseDirectory.value,
   Test / scalaSource := baseDirectory.value / "test",
+  Test / resourceDirectory := baseDirectory.value / "test",
 )
 
-lazy val day01 = (project in file("day01"))
-  .settings(name := "day01", baseSettings)
+def p(name: String) =
+  Project(name, file(name))
+    .settings(baseSettings)
 
-lazy val day02 = (project in file("day02"))
-  .settings(name := "day02", baseSettings)
-
-lazy val day03 = (project in file("day03"))
-  .settings(name := "day03", baseSettings)
-
-lazy val day04 = (project in file("day04"))
-  .settings(name := "day04", baseSettings)
+lazy val day01 = p("day01")
+lazy val day02 = p("day02")
+lazy val day03 = p("day03")
+lazy val day04 = p("day04")
+lazy val day05 = p("day05")
