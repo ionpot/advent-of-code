@@ -1,33 +1,47 @@
 import scala.io.Source
+import scala.concurrent.Await
+import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import concurrent.ExecutionContext.Implicits.global
 
 @main def main() =
   val lines = Source.fromResource("input.txt").getLines()
-  println(Races.parse(lines.toSeq).multiply)
+  val count = Races.parse(lines).count
+  println(Await.result(count, Duration.Inf))
 
-case class Races(races: Seq[Race]):
-  def multiply: Int = races.map(_.count).multiply
+case class Races(time: Int, distance: Long):
+  def count: Future[Int] =
+    Future.sequence(races).map(_.sum)
+
+  def races: Seq[Future[Int]] =
+    val chunk = 1_000_000
+    for i <- 0 to time / chunk
+    yield Future(toRace(i, chunk).count)
+
+  def toRace(i: Int, chunk: Int): Race =
+    val a = i * chunk
+    val b = a + chunk
+    val range = Range(a.max(1), b.min(time))
+    Race(BigInt(time), BigInt(distance), range)
 
 case object Races:
   val digits = "[0-9]+".r
-  def parse(lines: Iterable[String]): Races =
-    val Seq(times, distances) = lines.take(2).map(numbers).toSeq
-    val races =
-      for (time, distance) <- times.zip(distances)
-      yield Race(time, distance)
-    Races(races)
-  def numbers(input: String): Seq[Int] =
-    digits.findAllIn(input).map(_.toInt).toSeq
 
-case class Race(time: Int, distance: Int):
-  def count: Int = ways.count(x => x)
-  def ways: Seq[Boolean] =
-    for hold <- 1 until time
-    yield success(hold)
+  def parse(lines: Iterator[String]): Races =
+    val time = number(lines.next()).toInt
+    val distance = number(lines.next()).toLong
+    Races(time, distance)
+
+  def number(input: String): String =
+    digits.findAllIn(input).mkString
+
+case class Race(time: BigInt, distance: BigInt, range: Range):
+  def count: Int =
+    var count = 0
+    for hold <- range if success(hold)
+    do count += 1
+    count
+
   def success(hold: Int): Boolean =
-    (time - hold) * hold > distance
-
-extension (seq: Seq[Int])
-  def multiply: Int =
-    seq match
-      case Seq() => 0
-      case s => s.fold(1)(_ * _)
+    val h = BigInt(hold)
+    (time - h) * h > distance
