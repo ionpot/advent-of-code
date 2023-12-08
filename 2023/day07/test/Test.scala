@@ -8,6 +8,6 @@ class MySuite extends munit.FunSuite {
       "QQQJA 483",
     )
     val game = Game.parse(lines.iterator)
-    assertEquals(game.winnings, 6440)
+    assertEquals(game.winnings, 5905)
   }
 }

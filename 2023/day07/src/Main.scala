@@ -40,13 +40,25 @@ case class Hand(cards: Seq[Card]):
   def typeValue = getType.ordinal
 
   def getType: HandType =
-    cards.groupBy(_.label).values.map(_.length).toSeq.sorted match
+    val groups = cards.groupBy(_.label)
+    val jokers = groups.getOrElse(Card.joker, Seq()).length
+    val others = groups
+      .removed(Card.joker)
+      .values
+      .map(_.length)
+      .toSeq
+      .sorted
+      .reverse
+    val lengths =
+      if (others.isEmpty) Seq(jokers)
+      else others.tail.prepended(others.head + jokers)
+    lengths match
       case Seq(5) => HandType.FiveKind
-      case Seq(1, 4) => HandType.FourKind
-      case Seq(2, 3) => HandType.FullHouse
-      case Seq(1, 1, 3) => HandType.ThreeKind
-      case Seq(1, 2, 2) => HandType.TwoPair
-      case Seq(1, 1, 1, 2) => HandType.OnePair
+      case Seq(4, 1) => HandType.FourKind
+      case Seq(3, 2) => HandType.FullHouse
+      case Seq(3, 1, 1) => HandType.ThreeKind
+      case Seq(2, 2, 1) => HandType.TwoPair
+      case Seq(2, 1, 1, 1) => HandType.OnePair
       case Seq(1, 1, 1, 1, 1) => HandType.HighCard
       case other =>
         throw IllegalArgumentException(other.mkString(", "))
@@ -65,7 +77,9 @@ case class Card(label: String):
   def higherThan(other: Card) = value > other.value
 
 case object Card:
+  val joker = "J"
   val labels = Seq(
+    "J",
     "2",
     "3",
     "4",
@@ -75,7 +89,6 @@ case object Card:
     "8",
     "9",
     "T",
-    "J",
     "Q",
     "K",
     "A",
