@@ -2,7 +2,7 @@ import scala.io.Source
 
 class MySuite extends munit.FunSuite {
   test("directions") {
-    val dirs = Directions.parse("LR")
+    val dirs = Directions(Seq("L", "R"))
     assertEquals(dirs.next(), "L")
     assertEquals(dirs.next(), "R")
     assertEquals(dirs.next(), "L")
@@ -15,14 +15,8 @@ class MySuite extends munit.FunSuite {
     assertEquals(node.next("R"), "CCC")
     assert(!node.infinite)
   }
-  test("input-1") {
-    val lines = Source.fromResource("input-1.txt").getLines()
-    val map = DesertMap.parse(lines)
-    assertEquals(map.steps, 2)
-  }
-  test("input-2") {
-    val lines = Source.fromResource("input-2.txt").getLines()
-    val map = DesertMap.parse(lines)
-    assertEquals(map.steps, 6)
+  test("input") {
+    val lines = Source.fromResource("input.txt").getLines()
+    assertEquals(run(lines), BigInt(6))
   }
 }
