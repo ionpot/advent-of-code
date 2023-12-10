@@ -5,6 +5,6 @@ class MySuite extends munit.FunSuite {
       "1 3 6 10 15 21",
       "10 13 16 21 30 45",
     )
-    assertEquals(run(lines.iterator), 114)
+    assertEquals(run(lines.iterator), 2)
   }
 }

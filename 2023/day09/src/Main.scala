@@ -11,7 +11,8 @@ def run(lines: Iterator[String]): Int =
   predictions.sum
 
 def predict(sequence: Sequence): Int =
-    history(sequence).map(_.last).sum
+    val values = history(sequence).map(_.first)
+    values.head - values.tail.foldRight(0)(_ - _)
 
 def history(
     current: Sequence,
@@ -22,7 +23,7 @@ def history(
 
 case class Sequence(values: Seq[Int]):
   def allZero: Boolean = values.forall(_ == 0)
-  def last: Int = values.last
+  def first: Int = values.head
   def subSeq: Sequence =
     Sequence(
       values.sliding(2).map(slice => slice.last - slice.head).toSeq,
